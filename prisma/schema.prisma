@@ -1,0 +1,65 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         String       @id @default(uuid())
+  name       String
+  email      String       @unique
+  password   String
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  foundItems FoundItem[]
+  claims     Claim[]
+  profile    UserProfile?
+}
+
+model FoundItemCategory {
+  id         String      @id @default(uuid())
+  name       String
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  foundItems FoundItem[]
+}
+
+model FoundItem {
+  id            String            @id @default(uuid())
+  userId        String
+  user          User              @relation(fields: [userId], references: [id])
+  categoryId    String
+  category      FoundItemCategory @relation(fields: [categoryId], references: [id])
+  foundItemName String
+  description   String
+  location      String
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  Claim         Claim[]
+}
+
+model Claim {
+  id                     String    @id @default(uuid())
+  userId                 String
+  user                   User      @relation(fields: [userId], references: [id])
+  foundItemId            String
+  foundItem              FoundItem @relation(fields: [foundItemId], references: [id])
+  status                 String    @default("PENDING")
+  distinguishingFeatures String
+  lostDate               DateTime
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+}
+
+model UserProfile {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id])
+  bio       String
+  age       Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
